@@ -87,6 +87,13 @@ a:hover {
   transform: translateY(0);
 }
 
+.section-icon {
+  display: block;
+  width: 96px;
+  height: 96px;
+  margin: 0 auto 1.5rem;
+}
+
 /* Nav */
 .nav {
   position: sticky;
@@ -372,6 +379,10 @@ html[data-theme="light"] .theme-icon--moon {
   padding: 5rem 0;
 }
 
+.section + .section--alt {
+  padding-top: 2.5rem;
+}
+
 .section--alt {
   background: var(--bg-elevated);
   position: relative;
@@ -571,6 +582,54 @@ html[data-theme="light"] .theme-icon--moon {
   transform: translateY(-3px);
   text-decoration: none;
   box-shadow: 0 10px 28px rgba(0,0,0,.18);
+}
+
+/* Certifications */
+.certifications-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.5rem;
+}
+
+.certification-card {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.5rem;
+  opacity: 0;
+  animation: fadeInUp .55s cubic-bezier(.25,.46,.45,.94) forwards;
+  transition: transform .3s ease, border-color .3s ease, box-shadow .3s ease;
+}
+
+.certification-card:hover {
+  transform: translateY(-4px);
+  border-color: var(--accent);
+  box-shadow: 0 10px 30px rgba(0,0,0,.15);
+}
+
+.certification-card h3 {
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin-bottom: .4rem;
+  color: var(--text);
+}
+
+.certification-card__issuer {
+  color: var(--accent);
+  font-weight: 600;
+  font-size: .9rem;
+  margin-bottom: .25rem;
+}
+
+.certification-card__date {
+  color: var(--text-muted);
+  font-size: .85rem;
+  margin-bottom: 1rem;
+}
+
+.certification-card__link {
+  font-size: .9rem;
+  font-weight: 600;
 }
 
 /* Footer */

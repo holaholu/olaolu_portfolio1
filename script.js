@@ -9,6 +9,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const themeToggle = document.getElementById('themeToggle');
   const html = document.documentElement;
   const languageChart = document.getElementById('languageChart');
+  const certificationsGrid = document.getElementById('certificationsGrid');
 
   function applyTheme(theme) {
     html.setAttribute('data-theme', theme);
@@ -19,8 +20,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   const savedTheme = localStorage.getItem('theme');
-  const prefersLight = window.matchMedia('(prefers-color-scheme: light)').matches;
-  applyTheme(savedTheme || (prefersLight ? 'light' : 'dark'));
+  applyTheme(savedTheme || 'dark');
 
   if (themeToggle) {
     themeToggle.addEventListener('click', () => {
@@ -53,6 +53,7 @@ document.addEventListener('DOMContentLoaded', () => {
   document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
 
   function renderProjects(filter = 'All') {
+    if (!grid) return;
     grid.innerHTML = '';
     const filtered = filter === 'All'
       ? projects
@@ -79,7 +80,23 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function buildFilters() {
-    const categories = Array.from(new Set(projects.map(p => p.category))).sort();
+    if (!filters || !projects) return;
+    const categoryOrder = [
+      'AI / LLM / Agents',
+      'ML / Data',
+      'Full-Stack',
+      'Frontend',
+      'Backend',
+      'DevOps / Cloud',
+      'Tools',
+      'Other'
+    ];
+    const categories = Array.from(new Set(projects.map(p => p.category))).sort((a, b) => {
+      const ai = categoryOrder.indexOf(a);
+      const bi = categoryOrder.indexOf(b);
+      const fallback = 999;
+      return (ai === -1 ? fallback : ai) - (bi === -1 ? fallback : bi);
+    });
     const labels = ['All', ...categories];
 
     filters.innerHTML = '';
@@ -141,7 +158,26 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  function renderCertifications() {
+    if (!certificationsGrid || typeof certifications === 'undefined') return;
+    certificationsGrid.innerHTML = '';
+    certifications.forEach((cert, index) => {
+      const card = document.createElement('article');
+      card.className = 'certification-card';
+      card.style.animationDelay = `${index * 0.04}s`;
+      const date = cert.date ? `<p class="certification-card__date">${cert.date}</p>` : '';
+      card.innerHTML = `
+        <h3>${cert.title}</h3>
+        <p class="certification-card__issuer">${cert.issuer}</p>
+        ${date}
+        <a class="certification-card__link" href="${cert.url}" target="_blank" rel="noopener noreferrer">View credential →</a>
+      `;
+      certificationsGrid.appendChild(card);
+    });
+  }
+
   renderLanguageChart();
   buildFilters();
   renderProjects();
+  renderCertifications();
 });
