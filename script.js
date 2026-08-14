@@ -10,6 +10,8 @@ document.addEventListener('DOMContentLoaded', () => {
   const html = document.documentElement;
   const languageChart = document.getElementById('languageChart');
   const certificationsGrid = document.getElementById('certificationsGrid');
+  const blogGrid = document.getElementById('blogGrid');
+  const blogFilters = document.getElementById('blogFilters');
 
   function applyTheme(theme) {
     html.setAttribute('data-theme', theme);
@@ -176,8 +178,65 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  function renderBlogs(filter = 'All') {
+    if (!blogGrid || typeof blogs === 'undefined') return;
+    blogGrid.innerHTML = '';
+    const filtered = filter === 'All'
+      ? blogs
+      : blogs.filter(b => b.category === filter);
+
+    filtered.forEach((post, index) => {
+      const card = document.createElement('article');
+      card.className = 'blog-card';
+      card.style.animationDelay = `${index * 0.05}s`;
+      const date = new Date(post.date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+      card.innerHTML = `
+        <span class="blog-card__category">${post.category}</span>
+        <h3 class="blog-card__title"><a href="blog/${post.slug}.html">${post.title}</a></h3>
+        <p class="blog-card__excerpt">${post.excerpt}</p>
+        <div class="blog-card__tags">
+          ${post.tags.map(tag => `<span>${tag}</span>`).join('')}
+        </div>
+        <div class="blog-card__meta">
+          <time datetime="${post.date}">${date}</time>
+          <span>${post.readTime}</span>
+        </div>
+        <a class="blog-card__link" href="blog/${post.slug}.html">Read article →</a>
+      `;
+      blogGrid.appendChild(card);
+    });
+  }
+
+  function buildBlogFilters() {
+    if (!blogFilters || typeof blogs === 'undefined') return;
+    const categories = Array.from(new Set(blogs.map(b => b.category))).sort();
+    const labels = ['All', ...categories];
+
+    blogFilters.innerHTML = '';
+    labels.forEach((label, index) => {
+      const btn = document.createElement('button');
+      btn.className = `filter-btn ${index === 0 ? 'active' : ''}`;
+      btn.dataset.filter = label;
+      btn.textContent = label;
+      btn.setAttribute('role', 'tab');
+      btn.setAttribute('aria-selected', index === 0 ? 'true' : 'false');
+      btn.addEventListener('click', () => {
+        Array.from(blogFilters.children).forEach(child => {
+          child.classList.remove('active');
+          child.setAttribute('aria-selected', 'false');
+        });
+        btn.classList.add('active');
+        btn.setAttribute('aria-selected', 'true');
+        renderBlogs(label);
+      });
+      blogFilters.appendChild(btn);
+    });
+  }
+
   renderLanguageChart();
   buildFilters();
   renderProjects();
   renderCertifications();
+  buildBlogFilters();
+  renderBlogs();
 });

@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Why I Build LLM Agents as State Machines — a blog post by Olaolu Adisa." />
+  <title>LLM Agents as State Machines | Blog | Olaolu Adisa</title>
+  <link rel="icon" type="image/svg+xml" href="../favicon.svg" />
+  <link rel="stylesheet" href="../styles.css" />
+</head>
+<body>
+  <a href="#main" class="skip-link">Skip to content</a>
+
+  <nav class="nav" id="nav">
+    <div class="container nav__inner">
+      <a href="../index.html" class="nav__brand">Olaolu Adisa</a>
+      <button class="nav__toggle" id="navToggle" aria-label="Open menu" aria-expanded="false">
+        <span></span><span></span><span></span>
+      </button>
+      <ul class="nav__links" id="navLinks">
+        <li><a href="../index.html#about">About</a></li>
+        <li><a href="../index.html#skills">Skills</a></li>
+        <li><a href="../projects.html">Portfolio</a></li>
+        <li><a href="../certifications.html">Certifications</a></li>
+        <li><a href="../blog.html">Blog</a></li>
+        <li><a href="../index.html#contact">Contact</a></li>
+      </ul>
+      <button class="theme-toggle" id="themeToggle" aria-label="Toggle light mode" aria-pressed="false" title="Toggle light/dark mode">
+        <svg class="theme-icon theme-icon--sun" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+        <svg class="theme-icon theme-icon--moon" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+      </button>
+    </div>
+  </nav>
+
+  <main id="main">
+    <article class="blog-post">
+      <div class="container blog-post__inner">
+        <header class="blog-post__header">
+          <span class="blog-post__category">LLM Agents</span>
+          <h1 class="blog-post__title">Why I Build LLM Agents as State Machines</h1>
+          <div class="blog-post__meta">
+            <time datetime="2025-03-05">March 5, 2025</time>
+            <span>6 min read</span>
+          </div>
+          <div class="blog-post__tags">
+            <span>Agents</span><span>LangGraph</span><span>System Design</span>
+          </div>
+        </header>
+
+        <section class="blog-post__content">
+          <h2>The autonomy illusion</h2>
+          <p>When LLM agents first became popular, the promise was a system that could plan, act, and reason on its own. In practice, unconstrained autonomy leads to opaque behavior, infinite loops, and hard-to-debug failures. I now design agents as explicit state machines.</p>
+
+          <h2>States give you contracts</h2>
+          <p>Each state has a clear input, a clear responsibility, and a clear set of transitions. A "plan" state produces a plan. A "tool" state executes one tool. A "verify" state checks whether the result satisfies the goal. When something breaks, I know exactly where to look.</p>
+
+          <h2>Tool use is not free text</h2>
+          <p>Letting the model emit arbitrary JSON to call tools is fragile. We moved to structured outputs with schemas and strict validation. If the output does not match the schema, the state machine halts instead of guessing.</p>
+
+          <h2>Human-in-the-loop by design</h2>
+          <p>Not every decision should be automated. We added explicit approval states for high-stakes actions. This turned out to be easier to implement in a state machine than in an open-ended loop because the pause point is just another node.</p>
+
+          <h2>Testability follows structure</h2>
+          <p>Because states are isolated, we can unit-test each one. We can also replay traces by stepping through the same graph with the same inputs. That reproducibility makes regression testing possible.</p>
+
+          <h2>Bottom line</h2>
+          <p>State machines do not eliminate the magic of LLMs. They put guardrails around it. For production agents, I will take predictability over maximum autonomy every time.</p>
+        </section>
+
+        <footer class="blog-post__footer">
+          <a href="../blog.html" class="btn btn--secondary">← Back to Blog</a>
+        </footer>
+      </div>
+    </article>
+  </main>
+
+  <footer class="footer">
+    <div class="container footer__inner">
+      <p>&copy; <span id="year"></span> Olaolu Adisa.</p>
+    </div>
+  </footer>
+
+  <script src="../script.js"></script>
+</body>
+</html>

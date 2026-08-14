@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="How I Evaluate Fine-Tuned Models Without Losing My Mind — a blog post by Olaolu Adisa." />
+  <title>Evaluating Fine-Tuned Models | Blog | Olaolu Adisa</title>
+  <link rel="icon" type="image/svg+xml" href="../favicon.svg" />
+  <link rel="stylesheet" href="../styles.css" />
+</head>
+<body>
+  <a href="#main" class="skip-link">Skip to content</a>
+
+  <nav class="nav" id="nav">
+    <div class="container nav__inner">
+      <a href="../index.html" class="nav__brand">Olaolu Adisa</a>
+      <button class="nav__toggle" id="navToggle" aria-label="Open menu" aria-expanded="false">
+        <span></span><span></span><span></span>
+      </button>
+      <ul class="nav__links" id="navLinks">
+        <li><a href="../index.html#about">About</a></li>
+        <li><a href="../index.html#skills">Skills</a></li>
+        <li><a href="../projects.html">Portfolio</a></li>
+        <li><a href="../certifications.html">Certifications</a></li>
+        <li><a href="../blog.html">Blog</a></li>
+        <li><a href="../index.html#contact">Contact</a></li>
+      </ul>
+      <button class="theme-toggle" id="themeToggle" aria-label="Toggle light mode" aria-pressed="false" title="Toggle light/dark mode">
+        <svg class="theme-icon theme-icon--sun" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+        <svg class="theme-icon theme-icon--moon" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+      </button>
+    </div>
+  </nav>
+
+  <main id="main">
+    <article class="blog-post">
+      <div class="container blog-post__inner">
+        <header class="blog-post__header">
+          <span class="blog-post__category">Machine Learning</span>
+          <h1 class="blog-post__title">How I Evaluate Fine-Tuned Models Without Losing My Mind</h1>
+          <div class="blog-post__meta">
+            <time datetime="2025-07-08">July 8, 2025</time>
+            <span>7 min read</span>
+          </div>
+          <div class="blog-post__tags">
+            <span>Fine-Tuning</span><span>Evaluation</span><span>LLMs</span>
+          </div>
+        </header>
+
+        <section class="blog-post__content">
+          <h2>Define the task, not the metric</h2>
+          <p>Before touching a benchmark, write down what success looks like in user terms. A summarizer is useful if it preserves key facts and sounds natural. A classifier is useful if it catches edge cases the heuristic missed. The metric serves the task, not the other way around.</p>
+
+          <h2>Build a representative test set</h2>
+          <p>I split my evaluation data by scenario, not just randomly. Real user queries, synthetic adversarial examples, and historical failure cases each get their own bucket. A model that wins on average can still fail where it matters most.</p>
+
+          <h2>Compare against strong baselines</h2>
+          <p>A fine-tuned model should beat a good prompt on a capable base model. If it does not, you are paying training and maintenance costs for no benefit. I always include the best zero-shot prompt I can write as a baseline.</p>
+
+          <h2>Look at qualitative failures</h2>
+          <p>Aggregate scores hide important failure modes. I keep a running document of worst outputs and review them after each experiment. Often the fix is a data curation problem, not a modeling one.</p>
+
+          <h2>Measure cost and latency too</h2>
+          <p>A more accurate model is not always better. If it is twice as slow or ten times as expensive, the trade-off may not be worth it. Report accuracy, latency, and cost together.</p>
+
+          <h2>Final note</h2>
+          <p>Evaluation is a discipline, not a one-off step. The teams that maintain clean eval sets and honest baselines make better decisions about when to fine-tune and when to stop.</p>
+        </section>
+
+        <footer class="blog-post__footer">
+          <a href="../blog.html" class="btn btn--secondary">← Back to Blog</a>
+        </footer>
+      </div>
+    </article>
+  </main>
+
+  <footer class="footer">
+    <div class="container footer__inner">
+      <p>&copy; <span id="year"></span> Olaolu Adisa.</p>
+    </div>
+  </footer>
+
+  <script src="../script.js"></script>
+</body>
+</html>

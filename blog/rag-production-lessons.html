@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="RAG in Production: What Works, What Breaks, and What to Measure — a blog post by Olaolu Adisa." />
+  <title>RAG in Production | Blog | Olaolu Adisa</title>
+  <link rel="icon" type="image/svg+xml" href="../favicon.svg" />
+  <link rel="stylesheet" href="../styles.css" />
+</head>
+<body>
+  <a href="#main" class="skip-link">Skip to content</a>
+
+  <nav class="nav" id="nav">
+    <div class="container nav__inner">
+      <a href="../index.html" class="nav__brand">Olaolu Adisa</a>
+      <button class="nav__toggle" id="navToggle" aria-label="Open menu" aria-expanded="false">
+        <span></span><span></span><span></span>
+      </button>
+      <ul class="nav__links" id="navLinks">
+        <li><a href="../index.html#about">About</a></li>
+        <li><a href="../index.html#skills">Skills</a></li>
+        <li><a href="../projects.html">Portfolio</a></li>
+        <li><a href="../certifications.html">Certifications</a></li>
+        <li><a href="../blog.html">Blog</a></li>
+        <li><a href="../index.html#contact">Contact</a></li>
+      </ul>
+      <button class="theme-toggle" id="themeToggle" aria-label="Toggle light mode" aria-pressed="false" title="Toggle light/dark mode">
+        <svg class="theme-icon theme-icon--sun" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+        <svg class="theme-icon theme-icon--moon" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+      </button>
+    </div>
+  </nav>
+
+  <main id="main">
+    <article class="blog-post">
+      <div class="container blog-post__inner">
+        <header class="blog-post__header">
+          <span class="blog-post__category">LLMs</span>
+          <h1 class="blog-post__title">RAG in Production: What Works, What Breaks, and What to Measure</h1>
+          <div class="blog-post__meta">
+            <time datetime="2025-01-12">January 12, 2025</time>
+            <span>8 min read</span>
+          </div>
+          <div class="blog-post__tags">
+            <span>RAG</span><span>Vector Databases</span><span>Evaluation</span>
+          </div>
+        </header>
+
+        <section class="blog-post__content">
+          <h2>The prototype trap</h2>
+          <p>A RAG prototype is deceptively simple: chunk some documents, store embeddings, retrieve, then ask a language model to answer. In production, the story changes. Latency, recall, hallucinations, and maintenance all show up at once.</p>
+
+          <h2>Chunking is a product decision</h2>
+          <p>The right chunk size depends on what the user is trying to do. We started with fixed-size chunks and quickly found they broke logical boundaries. Semantic chunking, guided by headers and transitions, improved answer quality more than any embedding model change.</p>
+
+          <h2>Retrieval quality beats generation quality</h2>
+          <p>If the context is wrong, even the best LLM cannot save the answer. We built an evaluation set of 200 representative questions and measured context recall and precision. Tuning hybrid search with reranking gave us bigger gains than switching LLMs.</p>
+
+          <h2>You need a real answer metric</h2>
+          <p>BLEU and ROUGE are not enough. We used LLM-as-judge for faithfulness and relevance, but always kept a human-validated subset to sanity-check automatic scores. The metric you optimize becomes the ceiling of your product.</p>
+
+          <h2>Plan for stale data</h2>
+          <p>Documents update. Embeddings get stale. We added metadata filters and refresh jobs tied to source systems. Knowing when your knowledge base is out of date matters as much as knowing what is in it.</p>
+
+          <h2>Closing</h2>
+          <p>Production RAG is a retrieval problem dressed up as a generation problem. Focus on data quality, evaluation, and observable retrieval before chasing the latest model release.</p>
+        </section>
+
+        <footer class="blog-post__footer">
+          <a href="../blog.html" class="btn btn--secondary">← Back to Blog</a>
+        </footer>
+      </div>
+    </article>
+  </main>
+
+  <footer class="footer">
+    <div class="container footer__inner">
+      <p>&copy; <span id="year"></span> Olaolu Adisa.</p>
+    </div>
+  </footer>
+
+  <script src="../script.js"></script>
+</body>
+</html>

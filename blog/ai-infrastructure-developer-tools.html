@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Building AI Infrastructure: Lessons from Shipping Developer Tools — a blog post by Olaolu Adisa." />
+  <title>Building AI Infrastructure | Blog | Olaolu Adisa</title>
+  <link rel="icon" type="image/svg+xml" href="../favicon.svg" />
+  <link rel="stylesheet" href="../styles.css" />
+</head>
+<body>
+  <a href="#main" class="skip-link">Skip to content</a>
+
+  <nav class="nav" id="nav">
+    <div class="container nav__inner">
+      <a href="../index.html" class="nav__brand">Olaolu Adisa</a>
+      <button class="nav__toggle" id="navToggle" aria-label="Open menu" aria-expanded="false">
+        <span></span><span></span><span></span>
+      </button>
+      <ul class="nav__links" id="navLinks">
+        <li><a href="../index.html#about">About</a></li>
+        <li><a href="../index.html#skills">Skills</a></li>
+        <li><a href="../projects.html">Portfolio</a></li>
+        <li><a href="../certifications.html">Certifications</a></li>
+        <li><a href="../blog.html">Blog</a></li>
+        <li><a href="../index.html#contact">Contact</a></li>
+      </ul>
+      <button class="theme-toggle" id="themeToggle" aria-label="Toggle light mode" aria-pressed="false" title="Toggle light/dark mode">
+        <svg class="theme-icon theme-icon--sun" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+        <svg class="theme-icon theme-icon--moon" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+      </button>
+    </div>
+  </nav>
+
+  <main id="main">
+    <article class="blog-post">
+      <div class="container blog-post__inner">
+        <header class="blog-post__header">
+          <span class="blog-post__category">AI Infrastructure</span>
+          <h1 class="blog-post__title">Building AI Infrastructure: Lessons from Shipping Developer Tools</h1>
+          <div class="blog-post__meta">
+            <time datetime="2024-11-18">November 18, 2024</time>
+            <span>7 min read</span>
+          </div>
+          <div class="blog-post__tags">
+            <span>MLOps</span><span>Platform Engineering</span><span>LLMs</span>
+          </div>
+        </header>
+
+        <section class="blog-post__content">
+          <h2>The gap between model and product</h2>
+          <p>Most AI projects fail not because the model is bad, but because the surrounding infrastructure is brittle. A great LLM in a Jupyter notebook is not a product. After building several internal AI tools, I have come to see infrastructure as the decisive factor in whether an AI feature actually ships.</p>
+
+          <h2>Design around the feedback loop</h2>
+          <p>Developer tools live or die by how fast the user can iterate. For AI features, that means minimizing the time between a prompt change, evaluation, and deployment. We invested in a single command that runs offline evaluation against a golden dataset, then promotes the winning variant to staging. That loop became our product velocity.</p>
+
+          <h2>Observability is not optional</h2>
+          <p>Unlike traditional software, AI systems can degrade silently. Inputs drift, model outputs drift, and user expectations drift. We built lightweight tracing for every LLM call: latency, cost, token usage, and a sampled transcript of inputs and outputs. These traces became the first place we looked when a feature felt "off".</p>
+
+          <h2>Prefer composition over black boxes</h2>
+          <p>It is tempting to wrap everything in one massive agent. In practice, smaller components that do one thing well are easier to test, swap, and debug. We split our pipeline into retriever, synthesizer, validator, and formatter stages. Each stage had its own contract and its own tests.</p>
+
+          <h2>Make rollback boring</h2>
+          <p>The best infrastructure decision we made was versioned prompts and model configs tied to git commits. When a new prompt started producing worse results in production, we reverted in seconds instead of hours. Boring rollbacks are a competitive advantage.</p>
+
+          <h2>Final thought</h2>
+          <p>AI infrastructure is not glamorous, but it is where the value compounds. The teams that ship reliably are the ones that treat AI code like production code: tested, observable, and easy to change.</p>
+        </section>
+
+        <footer class="blog-post__footer">
+          <a href="../blog.html" class="btn btn--secondary">← Back to Blog</a>
+        </footer>
+      </div>
+    </article>
+  </main>
+
+  <footer class="footer">
+    <div class="container footer__inner">
+      <p>&copy; <span id="year"></span> Olaolu Adisa.</p>
+    </div>
+  </footer>
+
+  <script src="../script.js"></script>
+</body>
+</html>

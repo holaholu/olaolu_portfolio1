@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="MLOps for Small Teams: A Pragmatic Starting Point — a blog post by Olaolu Adisa." />
+  <title>MLOps for Small Teams | Blog | Olaolu Adisa</title>
+  <link rel="icon" type="image/svg+xml" href="../favicon.svg" />
+  <link rel="stylesheet" href="../styles.css" />
+</head>
+<body>
+  <a href="#main" class="skip-link">Skip to content</a>
+
+  <nav class="nav" id="nav">
+    <div class="container nav__inner">
+      <a href="../index.html" class="nav__brand">Olaolu Adisa</a>
+      <button class="nav__toggle" id="navToggle" aria-label="Open menu" aria-expanded="false">
+        <span></span><span></span><span></span>
+      </button>
+      <ul class="nav__links" id="navLinks">
+        <li><a href="../index.html#about">About</a></li>
+        <li><a href="../index.html#skills">Skills</a></li>
+        <li><a href="../projects.html">Portfolio</a></li>
+        <li><a href="../certifications.html">Certifications</a></li>
+        <li><a href="../blog.html">Blog</a></li>
+        <li><a href="../index.html#contact">Contact</a></li>
+      </ul>
+      <button class="theme-toggle" id="themeToggle" aria-label="Toggle light mode" aria-pressed="false" title="Toggle light/dark mode">
+        <svg class="theme-icon theme-icon--sun" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+        <svg class="theme-icon theme-icon--moon" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+      </button>
+    </div>
+  </nav>
+
+  <main id="main">
+    <article class="blog-post">
+      <div class="container blog-post__inner">
+        <header class="blog-post__header">
+          <span class="blog-post__category">MLOps</span>
+          <h1 class="blog-post__title">MLOps for Small Teams: A Pragmatic Starting Point</h1>
+          <div class="blog-post__meta">
+            <time datetime="2025-05-20">May 20, 2025</time>
+            <span>9 min read</span>
+          </div>
+          <div class="blog-post__tags">
+            <span>MLOps</span><span>CI/CD</span><span>FastAPI</span>
+          </div>
+        </header>
+
+        <section class="blog-post__content">
+          <h2>Start with the experiment, not the platform</h2>
+          <p>The first goal is to find a model that actually solves the problem. Until then, most MLOps tooling is premature. I usually begin with a notebook, a small dataset, and a single evaluation metric. Only after the prototype repeatedly passes a manual sniff test do I think about operationalizing it.</p>
+
+          <h2>Version everything that changes</h2>
+          <p>Code, data, and models all change. Use git for code, a simple dataset registry or DVC for data, and a model registry for artifacts. Even a spreadsheet of experiment results is better than nothing, but a real registry pays for itself the first time you need to reproduce a result.</p>
+
+          <h2>Containerize the inference path early</h2>
+          <p>The moment you have a model worth sharing, wrap the inference code in a container. It forces you to clarify dependencies, input schemas, and the serving interface. FastAPI plus Docker is my default starting point for Python models.</p>
+
+          <h2>Automated tests are a form of documentation</h2>
+          <p>Write tests for data expectations, model input/output contracts, and endpoint behavior. They do not need to be exhaustive. A few well-chosen tests catch regressions and onboard new teammates faster than any README.</p>
+
+          <h2>Monitor the right things</h2>
+          <p>Start with latency, errors, input distribution drift, and a handful of output quality samples. Fancy dashboards can wait. Alert on symptoms users care about, not every metric you can collect.</p>
+
+          <h2>Grow the platform as you grow the pain</h2>
+          <p>Do not build a full platform on day one. Add a tool when a repeated pain becomes expensive. Small teams win by staying close to the problem and iterating fast.</p>
+        </section>
+
+        <footer class="blog-post__footer">
+          <a href="../blog.html" class="btn btn--secondary">← Back to Blog</a>
+        </footer>
+      </div>
+    </article>
+  </main>
+
+  <footer class="footer">
+    <div class="container footer__inner">
+      <p>&copy; <span id="year"></span> Olaolu Adisa.</p>
+    </div>
+  </footer>
+
+  <script src="../script.js"></script>
+</body>
+</html>
