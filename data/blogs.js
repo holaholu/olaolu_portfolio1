@@ -5,7 +5,7 @@ const blogs = [
     excerpt: 'What I learned designing internal platforms that make machine learning models usable, observable, and maintainable in production.',
     category: 'AI Infrastructure',
     date: '2024-11-18',
-    readTime: '7 min read',
+    readTime: '14 min read',
     tags: ['MLOps', 'Platform Engineering', 'LLMs'],
     content: [
       {
@@ -40,7 +40,7 @@ const blogs = [
     excerpt: 'A practical walkthrough of moving retrieval-augmented generation from prototype to a production-grade system.',
     category: 'LLMs',
     date: '2025-01-12',
-    readTime: '8 min read',
+    readTime: '16 min read',
     tags: ['RAG', 'Vector Databases', 'Evaluation'],
     content: [
       {
@@ -75,7 +75,7 @@ const blogs = [
     excerpt: 'Moving from free-form agent loops to explicit state machines made our agentic systems more predictable, testable, and debuggable.',
     category: 'LLM Agents',
     date: '2025-03-05',
-    readTime: '6 min read',
+    readTime: '12 min read',
     tags: ['Agents', 'LangGraph', 'System Design'],
     content: [
       {
@@ -110,8 +110,8 @@ const blogs = [
     excerpt: 'You do not need a dedicated platform team to get 80% of the MLOps value. Here is the stack and workflow I recommend.',
     category: 'MLOps',
     date: '2025-05-20',
-    readTime: '9 min read',
-        tags: ['MLOps', 'CI/CD', 'FastAPI'],
+    readTime: '18 min read',
+    tags: ['MLOps', 'CI/CD', 'FastAPI'],
     content: [
       {
         heading: 'Start with the experiment, not the platform',
@@ -145,7 +145,7 @@ const blogs = [
     excerpt: 'A structured approach to comparing base, fine-tuned, and prompted models so you know what actually improved.',
     category: 'Machine Learning',
     date: '2025-07-08',
-    readTime: '7 min read',
+    readTime: '14 min read',
     tags: ['Fine-Tuning', 'Evaluation', 'LLMs'],
     content: [
       {

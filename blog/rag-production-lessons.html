@@ -40,7 +40,7 @@
           <h1 class="blog-post__title">RAG in Production: What Works, What Breaks, and What to Measure</h1>
           <div class="blog-post__meta">
             <time datetime="2025-01-12">January 12, 2025</time>
-            <span>8 min read</span>
+            <span>16 min read</span>
           </div>
           <div class="blog-post__tags">
             <span>RAG</span><span>Vector Databases</span><span>Evaluation</span>
@@ -49,22 +49,39 @@
 
         <section class="blog-post__content">
           <h2>The prototype trap</h2>
-          <p>A RAG prototype is deceptively simple: chunk some documents, store embeddings, retrieve, then ask a language model to answer. In production, the story changes. Latency, recall, hallucinations, and maintenance all show up at once.</p>
+          <p>A RAG prototype is deceptively simple: chunk some documents, store embeddings, retrieve, then ask a language model to answer. In production, the story changes. Latency, recall, hallucinations, and maintenance all show up at once. The gap between a demo that works on three documents and a system that serves thousands of users over a changing knowledge base is much larger than it first appears.</p>
+          <p>Prototypes tend to use small, clean documents and well-formed questions. Production sees PDFs with malformed tables, scanned images, inconsistent headers, user queries full of typos and jargon, and expectations that answers should arrive in under a second. If the evaluation only covers the happy path, the system will look great until real traffic arrives.</p>
+
+          <img class="blog-post__image" src="images/rag-chat.jpg" alt="AI chat interface on a laptop" loading="lazy" />
 
           <h2>Chunking is a product decision</h2>
           <p>The right chunk size depends on what the user is trying to do. We started with fixed-size chunks and quickly found they broke logical boundaries. Semantic chunking, guided by headers and transitions, improved answer quality more than any embedding model change.</p>
+          <p>We experimented with overlapping chunks, sentence-boundary chunking, and hierarchical layouts where parent documents kept metadata about their children. The winning approach was context-aware: use document structure when available, fall back to semantic boundaries when it was not, and keep chunk size proportional to the expected retrieval context. For legal documents, preserving clause boundaries mattered. For support tickets, grouping by conversation thread mattered more.</p>
+          <p>We also found that chunking interacts heavily with the prompt. A small chunk gives the model less context to reason over. A large chunk may include irrelevant text and dilute attention. We tuned both together rather than optimizing chunk size in isolation. The chunk is not a preprocessing detail; it is a user experience lever.</p>
 
           <h2>Retrieval quality beats generation quality</h2>
           <p>If the context is wrong, even the best LLM cannot save the answer. We built an evaluation set of 200 representative questions and measured context recall and precision. Tuning hybrid search with reranking gave us bigger gains than switching LLMs.</p>
+          <p>Our retrieval pipeline combined dense embedding search, sparse keyword search, and metadata filtering. Dense search excelled at paraphrased questions and conceptual similarity. Sparse search recovered rare technical terms and exact product names. Metadata filters cut the search space by tenant, date, or document type. A lightweight cross-encoder reranker then reordered the top candidates.</p>
+          <p>The reranker was the highest-ROI change. For a small latency cost, it significantly improved precision at the top. We cached common reranker calls and batched requests to keep latency acceptable. Measuring context recall showed that many failures were retrieval failures, not generation failures. Fixing retrieval made every downstream metric improve.</p>
+
+          <img class="blog-post__image" src="images/rag-chip.jpg" alt="Abstract microchip technology background" loading="lazy" />
 
           <h2>You need a real answer metric</h2>
           <p>BLEU and ROUGE are not enough. We used LLM-as-judge for faithfulness and relevance, but always kept a human-validated subset to sanity-check automatic scores. The metric you optimize becomes the ceiling of your product.</p>
+          <p>We settled on three core metrics. Faithfulness measured whether the generated answer was supported by the retrieved context. Relevance measured whether the answer addressed the question. Coverage measured whether key facts from the context were included. Each was scored by a separate judge prompt and validated against a human-labeled sample of 100 examples.</p>
+          <p>We also tracked user-level signals. Thumbs up, thumbs down, and follow-up question patterns gave implicit feedback that automatic metrics missed. A high faithfulness score did not always mean a useful answer. Combining automatic and behavioral signals gave a fuller picture.</p>
 
           <h2>Plan for stale data</h2>
           <p>Documents update. Embeddings get stale. We added metadata filters and refresh jobs tied to source systems. Knowing when your knowledge base is out of date matters as much as knowing what is in it.</p>
+          <p>Our refresh strategy depended on the source. For documents that changed frequently, such as runbooks or API docs, we used webhooks or scheduled polling to detect changes and re-embed affected chunks. For stable reference material, we refreshed weekly. We tracked the last-updated timestamp on every chunk and exposed it in the UI so users could judge answer freshness.</p>
+          <p>Deletion was harder than insertion. Removing a chunk from the vector store was straightforward, but removing a fact that had been learned across multiple chunks required care. We maintained a content-addressed store so that an updated document version replaced the old chunks exactly rather than leaving orphans.</p>
+
+          <h2>Latency and cost are user experience features</h2>
+          <p>Every millisecond of retrieval and generation latency shows up in user satisfaction. We profiled the pipeline end to end and found that embedding the query, vector search, and reranking dominated the pre-generation time. Caching embeddings for repeated queries saved a surprising amount of latency. Approximate nearest neighbor indexes with tuned parameters kept search fast without much recall loss.</p>
+          <p>Cost also mattered. Larger models and longer contexts are more expensive. We used smaller models for retrieval and reranking and reserved the large model for final synthesis. For high-traffic queries, we cached synthesized answers and invalidated them when source documents changed. Streaming responses improved perceived latency even when total time was similar.</p>
 
           <h2>Closing</h2>
-          <p>Production RAG is a retrieval problem dressed up as a generation problem. Focus on data quality, evaluation, and observable retrieval before chasing the latest model release.</p>
+          <p>Production RAG is a retrieval problem dressed up as a generation problem. Focus on data quality, evaluation, and observable retrieval before chasing the latest model release. A solid retrieval pipeline with a modest model will usually outperform a weak retrieval pipeline with the most advanced model. The hard part is not generating text; it is generating the right text from the right sources at the right time.</p>
         </section>
 
         <footer class="blog-post__footer">

@@ -40,7 +40,7 @@
           <h1 class="blog-post__title">MLOps for Small Teams: A Pragmatic Starting Point</h1>
           <div class="blog-post__meta">
             <time datetime="2025-05-20">May 20, 2025</time>
-            <span>9 min read</span>
+            <span>18 min read</span>
           </div>
           <div class="blog-post__tags">
             <span>MLOps</span><span>CI/CD</span><span>FastAPI</span>
@@ -50,21 +50,42 @@
         <section class="blog-post__content">
           <h2>Start with the experiment, not the platform</h2>
           <p>The first goal is to find a model that actually solves the problem. Until then, most MLOps tooling is premature. I usually begin with a notebook, a small dataset, and a single evaluation metric. Only after the prototype repeatedly passes a manual sniff test do I think about operationalizing it.</p>
+          <p>It is easy to get distracted by feature stores, experiment trackers, and model registries before you have a working prototype. Those tools are valuable, but they shine when you have something worth scaling. In the earliest phase, speed of iteration matters more than process maturity. A simple spreadsheet of experiments and a git commit per promising run will carry you surprisingly far.</p>
+          <p>That said, even early experiments benefit from a few habits. Keep a dated log of what you tried and why. Save the exact training code and random seeds. Pin dependency versions. These practices cost almost nothing and save hours when you need to reproduce a result later. Reproducibility is not a luxury; it is the foundation of everything that follows.</p>
+
+          <img class="blog-post__image" src="images/mlops-containers.jpg" alt="Cargo ship loaded with containers at a shipping port" loading="lazy" />
 
           <h2>Version everything that changes</h2>
           <p>Code, data, and models all change. Use git for code, a simple dataset registry or DVC for data, and a model registry for artifacts. Even a spreadsheet of experiment results is better than nothing, but a real registry pays for itself the first time you need to reproduce a result.</p>
+          <p>For code, standard git practices apply. Commit often, write meaningful messages, and tag releases. For data, I prefer a lightweight registry over full DVC when the team is small. A registry can be as simple as a cloud storage bucket with immutable filenames derived from content hashes. The key is that once a dataset version is created, it never changes. Models follow the same pattern. Every trained artifact gets a unique identifier and metadata about the data, code, and hyperparameters that produced it.</p>
+          <p>Experiment tracking becomes essential once multiple people are running experiments. Tools like MLflow, Weights & Biases, or even a shared spreadsheet help compare runs. I record the model architecture, dataset version, metric values, and a short note about the change. This makes it easy to see what worked and avoids duplicate effort. The discipline of logging is more important than the specific tool.</p>
 
           <h2>Containerize the inference path early</h2>
           <p>The moment you have a model worth sharing, wrap the inference code in a container. It forces you to clarify dependencies, input schemas, and the serving interface. FastAPI plus Docker is my default starting point for Python models.</p>
+          <p>Containerization removes the classic "works on my machine" problem. It also makes deployment portable across local development, staging, and production. I start with a minimal Dockerfile that installs dependencies, copies the model artifact, and exposes a health check and a single prediction endpoint. The endpoint accepts and returns validated Pydantic models so the contract is explicit.</p>
+          <p>Early containerization also encourages clean separation between training and serving code. Training code tends to be exploratory and dependency-heavy. Serving code should be small, fast, and stable. By building the serving container as soon as the model works, you catch integration issues before they become expensive to fix.</p>
 
           <h2>Automated tests are a form of documentation</h2>
           <p>Write tests for data expectations, model input/output contracts, and endpoint behavior. They do not need to be exhaustive. A few well-chosen tests catch regressions and onboard new teammates faster than any README.</p>
+          <p>Data tests check that the input features match the expected schema, ranges, and distributions. These tests run during training and serving. A schema mismatch in production is often the first sign of an upstream data change. Model tests verify that the model produces the right shape of output and that prediction behavior is sane for known examples. Endpoint tests exercise the full request path and verify status codes, response formats, and error handling.</p>
+          <p>Tests also make refactoring possible. Without them, every improvement feels risky. With them, you can upgrade libraries, swap models, or restructure code with confidence. On small teams, where one person often owns multiple components, this confidence multiplier is especially valuable.</p>
+
+          <img class="blog-post__image" src="images/mlops-server.jpg" alt="Server rack in a modern data center" loading="lazy" />
 
           <h2>Monitor the right things</h2>
           <p>Start with latency, errors, input distribution drift, and a handful of output quality samples. Fancy dashboards can wait. Alert on symptoms users care about, not every metric you can collect.</p>
+          <p>Latency and errors tell you whether the service is healthy from an engineering perspective. Input drift tells you whether the world has changed in a way that might break model assumptions. Output quality samples, reviewed periodically, tell you whether the model still behaves reasonably. These four categories cover most operational concerns.</p>
+          <p>For output quality, I prefer targeted sampling over aggregate metrics. Aggregate metrics can hide important failure modes. A weekly review of the worst predictions, stratified by input type, often reveals issues that dashboards miss. When a pattern emerges, add a test or an alert. This keeps monitoring focused and actionable.</p>
+
+          <h2>Automate deployments gradually</h2>
+          <p>CI/CD for machine learning does not need to be fully automated on day one. Start by automating the pieces that are repetitive and error-prone. A CI pipeline that runs tests on every pull request is an easy win. A pipeline that builds and pushes a serving container on every merge to main is another. Model training can remain manual or semi-automatic until the cadence justifies full automation.</p>
+          <p>When you do automate training, make it idempotent. The pipeline should be able to run from a clean state and produce the same artifact given the same inputs. It should log data versions, hyperparameters, and metrics. It should fail loudly if data quality checks do not pass. These properties make retraining less scary and more routine.</p>
+          <p>Deployment automation should also include smoke tests. After a new container starts, run a small set of representative requests and compare outputs to expected ranges. This catches configuration mistakes, missing model files, and dependency issues before real traffic arrives. The goal is not zero manual steps; it is zero preventable outages.</p>
 
           <h2>Grow the platform as you grow the pain</h2>
           <p>Do not build a full platform on day one. Add a tool when a repeated pain becomes expensive. Small teams win by staying close to the problem and iterating fast.</p>
+          <p>I think of MLOps maturity as a set of layers. Layer one is reproducible experiments. Layer two is versioned artifacts and basic tests. Layer three is containerized serving and simple monitoring. Layer four is automated retraining and CI/CD. Each layer adds value, but only add the next layer when the current one feels like a bottleneck. Premature sophistication slows you down.</p>
+          <p>The teams I have seen succeed are the ones that treat MLOps as a means to an end. The end is reliable, useful machine learning in production. Every process, tool, and dashboard should serve that goal. If it does not, it is probably too early or too much.</p>
         </section>
 
         <footer class="blog-post__footer">

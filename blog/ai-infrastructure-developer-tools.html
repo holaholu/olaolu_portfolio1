@@ -40,7 +40,7 @@
           <h1 class="blog-post__title">Building AI Infrastructure: Lessons from Shipping Developer Tools</h1>
           <div class="blog-post__meta">
             <time datetime="2024-11-18">November 18, 2024</time>
-            <span>7 min read</span>
+            <span>14 min read</span>
           </div>
           <div class="blog-post__tags">
             <span>MLOps</span><span>Platform Engineering</span><span>LLMs</span>
@@ -49,22 +49,39 @@
 
         <section class="blog-post__content">
           <h2>The gap between model and product</h2>
-          <p>Most AI projects fail not because the model is bad, but because the surrounding infrastructure is brittle. A great LLM in a Jupyter notebook is not a product. After building several internal AI tools, I have come to see infrastructure as the decisive factor in whether an AI feature actually ships.</p>
+          <p>Most AI projects fail not because the model is bad, but because the surrounding infrastructure is brittle. A great LLM in a Jupyter notebook is not a product. After building several internal AI tools, I have come to see infrastructure as the decisive factor in whether an AI feature actually ships. The transition from a promising experiment to a service that other developers can rely on is where most of the hard engineering lives.</p>
+          <p>Infrastructure in this context is not just servers and GPUs. It is the entire path from prompt or model artifact to a documented, tested, observable endpoint. It includes data validation, experiment tracking, evaluation pipelines, serving contracts, error handling, cost controls, and rollback procedures. When one of those pieces is missing, the system feels magical in a demo and fragile in production.</p>
+
+          <img class="blog-post__image" src="images/ai-infrastructure-server.jpg" alt="Server racks in a modern data center" loading="lazy" />
 
           <h2>Design around the feedback loop</h2>
           <p>Developer tools live or die by how fast the user can iterate. For AI features, that means minimizing the time between a prompt change, evaluation, and deployment. We invested in a single command that runs offline evaluation against a golden dataset, then promotes the winning variant to staging. That loop became our product velocity.</p>
+          <p>We structured the loop as four stages: edit, evaluate, compare, and promote. A developer changes a prompt or model config, commits the change, and a CI job runs the evaluation suite. Results surface as a diff against the current baseline, showing regressions and improvements by scenario. If the new variant passes guardrails, it is automatically tagged for staging deployment. This removed the manual copy-paste of prompts between notebooks and production code, which had been a common source of silent drift.</p>
+          <p>The golden dataset itself became a shared asset. We versioned it with the same discipline as code, and every example included a rationale. When a user reported a bad output, we added a minimal reproduction to the dataset before fixing the bug. Over time, this converted anecdotal complaints into measurable coverage.</p>
 
           <h2>Observability is not optional</h2>
           <p>Unlike traditional software, AI systems can degrade silently. Inputs drift, model outputs drift, and user expectations drift. We built lightweight tracing for every LLM call: latency, cost, token usage, and a sampled transcript of inputs and outputs. These traces became the first place we looked when a feature felt "off".</p>
+          <p>We also tracked aggregate signals. Per-endpoint latency percentiles showed when a new model release was slower than expected. Token usage trends caught prompt bloat and unexpected loops. Output embedding drift, computed against a reference window, gave an early warning when user language or domain shifted. None of these metrics are perfect on their own, but together they form a useful picture of system health.</p>
+          <p>Sampling was important. Storing every input and output is expensive and often unnecessary. We sampled heavily from errors, moderately from high-latency requests, and lightly from normal traffic. This gave us enough signal to debug without drowning in cost or privacy concerns.</p>
 
           <h2>Prefer composition over black boxes</h2>
           <p>It is tempting to wrap everything in one massive agent. In practice, smaller components that do one thing well are easier to test, swap, and debug. We split our pipeline into retriever, synthesizer, validator, and formatter stages. Each stage had its own contract and its own tests.</p>
+          <p>The retriever was responsible for returning relevant context. The synthesizer generated a candidate answer from that context. The validator checked the answer for policy violations, factual consistency, and format constraints. The formatter produced the final response and any metadata the client needed. When we wanted to experiment with a new retrieval strategy, we only touched the retriever. When we tightened safety rules, only the validator changed.</p>
+          <p>This modular design made A/B testing straightforward. We could run two retrievers in parallel and compare their downstream impact on answer quality. It also made failures easier to attribute. Instead of asking why the whole system produced a bad output, we asked which stage introduced the problem.</p>
+
+          <img class="blog-post__image" src="images/ai-infrastructure-network.jpg" alt="Network cables in a data center" loading="lazy" />
 
           <h2>Make rollback boring</h2>
           <p>The best infrastructure decision we made was versioned prompts and model configs tied to git commits. When a new prompt started producing worse results in production, we reverted in seconds instead of hours. Boring rollbacks are a competitive advantage.</p>
+          <p>We treated prompts and configs as code artifacts. They lived in the repository, went through code review, and were loaded by the runtime at startup. A deployment always pointed to a specific commit hash, so we could reproduce any historical behavior. Feature flags controlled which variant served live traffic, allowing graduated rollouts and instant reversions.</p>
+          <p>We also kept a short incident checklist. First, check the latency and error dashboards. Second, compare recent traces against the previous hour. Third, if a new deployment correlates with the issue, flip the feature flag. Fourth, add a reproduction to the golden dataset. This simple routine turned panicked debugging into a calm, repeatable process.</p>
+
+          <h2>Developer experience is infrastructure too</h2>
+          <p>The best AI infrastructure is invisible to the application developer. They should not need to understand token counting, queue management, or model versioning to ship a feature. We built thin client libraries that handled retries, timeouts, structured output parsing, and error normalization. A developer could call the service the same way they call any internal API.</p>
+          <p>Documentation, SDKs, and example notebooks matter. We maintained a living API reference and a set of runnable examples for common patterns. Onboarding time dropped from days to hours. When developers encountered edge cases, they knew where to look and how to report them.</p>
 
           <h2>Final thought</h2>
-          <p>AI infrastructure is not glamorous, but it is where the value compounds. The teams that ship reliably are the ones that treat AI code like production code: tested, observable, and easy to change.</p>
+          <p>AI infrastructure is not glamorous, but it is where the value compounds. The teams that ship reliably are the ones that treat AI code like production code: tested, observable, and easy to change. The models will keep improving, but the ability to put them into production safely and iterate quickly is a skill that remains scarce and valuable.</p>
         </section>
 
         <footer class="blog-post__footer">

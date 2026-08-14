@@ -40,7 +40,7 @@
           <h1 class="blog-post__title">Why I Build LLM Agents as State Machines</h1>
           <div class="blog-post__meta">
             <time datetime="2025-03-05">March 5, 2025</time>
-            <span>6 min read</span>
+            <span>12 min read</span>
           </div>
           <div class="blog-post__tags">
             <span>Agents</span><span>LangGraph</span><span>System Design</span>
@@ -50,21 +50,38 @@
         <section class="blog-post__content">
           <h2>The autonomy illusion</h2>
           <p>When LLM agents first became popular, the promise was a system that could plan, act, and reason on its own. In practice, unconstrained autonomy leads to opaque behavior, infinite loops, and hard-to-debug failures. I now design agents as explicit state machines.</p>
+          <p>The appeal of a fully autonomous agent is understandable. You describe a goal, and the model figures out the steps. Early demos are impressive because the model can string together tool calls and explanations. But the same flexibility that makes demos exciting makes production deployments risky. A small change in a prompt or a slightly ambiguous user request can send the agent down an unexpected path. Without structure, it is difficult to know what path it took, why it took it, or how to fix it.</p>
+
+          <img class="blog-post__image" src="images/agents-robot.jpg" alt="Close-up of a modern robotic mechanism" loading="lazy" />
 
           <h2>States give you contracts</h2>
           <p>Each state has a clear input, a clear responsibility, and a clear set of transitions. A "plan" state produces a plan. A "tool" state executes one tool. A "verify" state checks whether the result satisfies the goal. When something breaks, I know exactly where to look.</p>
+          <p>In our systems, every state is a pure function of the current state and any new inputs. It either returns an updated state or a transition to another state. This discipline makes reasoning about the agent much easier. You can read the graph and understand the intended lifecycle of a task. You can also enforce invariants: the planning state may only transition to execution, execution may only transition to verification or error handling, and verification may loop back to execution or terminate.</p>
+          <p>Contracts also simplify retries. If a tool call fails, the tool state retries that specific call with exponential backoff instead of asking the model to replan everything. If verification fails, we return to the relevant execution step rather than restarting from scratch. These localized recoveries make the system faster and more predictable.</p>
 
           <h2>Tool use is not free text</h2>
           <p>Letting the model emit arbitrary JSON to call tools is fragile. We moved to structured outputs with schemas and strict validation. If the output does not match the schema, the state machine halts instead of guessing.</p>
+          <p>We define tool interfaces with Pydantic models or JSON schemas. The model fills in the fields, and the runtime validates the result before any tool runs. This catches hallucinated parameter names, wrong types, and missing required arguments. When validation fails, we route to an error handler rather than retrying blindly. Often the error handler asks the model to correct the call with feedback about what went wrong.</p>
+          <p>Strong typing also helps with observability. We can log each tool call with its parameters, the resulting state change, and the duration. This makes it possible to reconstruct exactly what happened during a run. It also lets us build unit tests around tool states by mocking inputs and asserting transitions.</p>
 
           <h2>Human-in-the-loop by design</h2>
           <p>Not every decision should be automated. We added explicit approval states for high-stakes actions. This turned out to be easier to implement in a state machine than in an open-ended loop because the pause point is just another node.</p>
+          <p>Approval states expose the pending action, the rationale, and the supporting evidence to a human reviewer. The reviewer can approve, reject, or request clarification. The agent then resumes at the appropriate next state. This design keeps the human in control without requiring them to micromanage every step.</p>
+          <p>We also use human-in-the-loop for ambiguity resolution. When a user request could map to multiple workflows, the agent pauses and asks for clarification rather than making a risky assumption. This is especially important in domains like customer support or financial operations, where the cost of a wrong action is high. The state machine makes these pause points explicit and auditable.</p>
+
+          <img class="blog-post__image" src="images/agents-monitor.jpg" alt="OpenAI website on a computer monitor" loading="lazy" />
 
           <h2>Testability follows structure</h2>
           <p>Because states are isolated, we can unit-test each one. We can also replay traces by stepping through the same graph with the same inputs. That reproducibility makes regression testing possible.</p>
+          <p>Our tests cover three levels. Unit tests verify that each state produces the correct output for a given input. Integration tests verify that common state sequences produce the expected end-to-end behavior. Regression tests replay saved traces from production and assert that the new code produces the same transitions and outputs.</p>
+          <p>Replay has been especially valuable. When a user reports an unexpected result, we load the trace into a test harness and step through it. We can modify a single state, rerun the trace, and compare outcomes. This dramatically shortens the debugging cycle and gives us confidence that fixes do not introduce new regressions.</p>
+
+          <h2>Limit loops with explicit control flow</h2>
+          <p>One of the most common agent failures is getting stuck in a loop. The model calls a tool, sees a result it does not like, calls another tool, and repeats indefinitely. In a state machine, loops are explicit. We set maximum iteration counts, define clear exit conditions, and route to a failure state when limits are reached.</p>
+          <p>We also distinguish between productive loops and wasteful loops. A productive loop, such as iterating through paginated results, has a clear termination condition. A wasteful loop, such as repeatedly reformulating a query, is often a symptom of poor planning. Making the loop structure visible helps us identify and eliminate wasteful patterns.</p>
 
           <h2>Bottom line</h2>
-          <p>State machines do not eliminate the magic of LLMs. They put guardrails around it. For production agents, I will take predictability over maximum autonomy every time.</p>
+          <p>State machines do not eliminate the magic of LLMs. They put guardrails around it. For production agents, I will take predictability over maximum autonomy every time. A state-machine approach gives you the benefits of language model reasoning while keeping the system understandable, testable, and safe to operate.</p>
         </section>
 
         <footer class="blog-post__footer">

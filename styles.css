@@ -821,6 +821,14 @@ html[data-theme="light"] .theme-icon--moon {
   color: var(--text-muted);
 }
 
+.blog-post__image {
+  width: 100%;
+  border-radius: var(--radius);
+  margin: 2rem 0;
+  box-shadow: var(--shadow);
+  border: 1px solid var(--border);
+}
+
 .blog-post__content p:last-child {
   margin-bottom: 0;
 }

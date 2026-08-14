@@ -40,7 +40,7 @@
           <h1 class="blog-post__title">How I Evaluate Fine-Tuned Models Without Losing My Mind</h1>
           <div class="blog-post__meta">
             <time datetime="2025-07-08">July 8, 2025</time>
-            <span>7 min read</span>
+            <span>14 min read</span>
           </div>
           <div class="blog-post__tags">
             <span>Fine-Tuning</span><span>Evaluation</span><span>LLMs</span>
@@ -50,21 +50,40 @@
         <section class="blog-post__content">
           <h2>Define the task, not the metric</h2>
           <p>Before touching a benchmark, write down what success looks like in user terms. A summarizer is useful if it preserves key facts and sounds natural. A classifier is useful if it catches edge cases the heuristic missed. The metric serves the task, not the other way around.</p>
+          <p>Defining the task forces you to be specific about the user and the failure mode. A support ticket classifier might need high recall on urgent issues even if precision suffers. A creative writing assistant might prioritize diversity and tone over factual completeness. These trade-offs should be explicit. When stakeholders disagree about which model is better, you can trace the disagreement back to the task definition rather than arguing about numbers.</p>
+          <p>I keep a short task spec for every model I evaluate. It includes the input, the output, the user, the success criteria, and the worst acceptable failure. This document is more useful than any single metric. It keeps the team aligned and prevents over-optimization of the wrong thing.</p>
+
+          <img class="blog-post__image" src="images/eval-tablet.jpg" alt="Business analysis on a tablet with graphs and charts" loading="lazy" />
 
           <h2>Build a representative test set</h2>
           <p>I split my evaluation data by scenario, not just randomly. Real user queries, synthetic adversarial examples, and historical failure cases each get their own bucket. A model that wins on average can still fail where it matters most.</p>
+          <p>Random splits assume the future looks like the past. In practice, new user behaviors, edge cases, and product changes shift the distribution. Scenario buckets make these shifts visible. I usually have at least three buckets: typical usage, known hard cases, and stress tests designed to expose weaknesses. Each bucket gets its own metric and a minimum performance threshold.</p>
+          <p>The test set should be curated, not collected. More examples are not always better. A small, well-labeled set that covers the important failure modes is more useful than a large, noisy set. I also guard against leakage. If an example or a near-duplicate appears in the training data, the metric is misleading. Simple similarity checks and manual spot checks help catch this.</p>
 
           <h2>Compare against strong baselines</h2>
           <p>A fine-tuned model should beat a good prompt on a capable base model. If it does not, you are paying training and maintenance costs for no benefit. I always include the best zero-shot prompt I can write as a baseline.</p>
+          <p>Beyond zero-shot, I also test few-shot prompting and chain-of-thought prompting when appropriate. These baselines are often surprisingly strong, especially for tasks where the model already has relevant pre-training knowledge. A fine-tuned model that only matches a few-shot baseline is usually not worth the operational complexity.</p>
+          <p>Baseline comparison should include both quality and non-quality factors. A fine-tuned model might produce slightly better outputs but require more tokens, longer latency, or frequent retraining. A simpler baseline can be easier to maintain and easier to explain to stakeholders. The decision to fine-tune is a systems decision, not just a leaderboard decision.</p>
 
           <h2>Look at qualitative failures</h2>
           <p>Aggregate scores hide important failure modes. I keep a running document of worst outputs and review them after each experiment. Often the fix is a data curation problem, not a modeling one.</p>
+          <p>Qualitative review is where the real insights live. Two models with the same average score can have very different failure patterns. One might hallucinate numbers; the other might be verbose and off-topic. Knowing which failure pattern is more acceptable to users drives the model selection. It also drives the mitigation strategy. Hallucination might be fixed with retrieval or output constraints. Verbosity might be fixed with training examples or a stronger system prompt.</p>
+          <p>I organize failures by type and severity. Reproducible, harmful errors get the highest priority. Cosmetic issues get lower priority. This triage prevents the team from chasing every imperfect output and focuses improvement on what matters.</p>
+
+          <img class="blog-post__image" src="images/eval-graph.jpg" alt="Business data graph on a monitor" loading="lazy" />
 
           <h2>Measure cost and latency too</h2>
           <p>A more accurate model is not always better. If it is twice as slow or ten times as expensive, the trade-off may not be worth it. Report accuracy, latency, and cost together.</p>
+          <p>I record the average and tail latency for each candidate on a representative batch. I also estimate inference cost at expected traffic levels. A small accuracy gain that doubles serving cost is often a bad business decision, especially if the gain is on low-priority examples. Presenting these three numbers together forces a realistic conversation.</p>
+          <p>For fine-tuned models, training cost matters too. Larger models and longer training runs increase experimentation friction. If the team cannot afford to retrain frequently, the model becomes stale. I prefer a model that is good enough and cheap to iterate over a slightly better model that is expensive to maintain.</p>
+
+          <h2>Use automatic metrics with eyes open</h2>
+          <p>Automatic metrics are useful for screening, not for final decisions. I use them to quickly eliminate bad ideas and to track trends across experiments. I do not let them replace human judgment on the final model.</p>
+          <p>For classification, accuracy, precision, recall, and F1 are standard. For generation, I use task-specific metrics and LLM-as-judge scores. No automatic metric captures everything. A high BLEU score can reward outputs that are fluent but wrong. A high faithfulness score can miss subtle misinterpretations. I always pair automatic metrics with a manual review of a sampled subset.</p>
+          <p>When using LLM-as-judge, I validate the judge against human labels. A poorly designed judge prompt can be biased toward longer outputs, more confident language, or surface features. I iterate on the judge prompt using a calibration set where human labels are trusted. Once the judge correlates well with humans, I use it at scale but continue to spot-check.</p>
 
           <h2>Final note</h2>
-          <p>Evaluation is a discipline, not a one-off step. The teams that maintain clean eval sets and honest baselines make better decisions about when to fine-tune and when to stop.</p>
+          <p>Evaluation is a discipline, not a one-off step. The teams that maintain clean eval sets and honest baselines make better decisions about when to fine-tune and when to stop. A good evaluation process protects you from both premature optimization and unnecessary model churn. It turns model selection from a matter of opinion into a matter of evidence.</p>
         </section>
 
         <footer class="blog-post__footer">
